@@ -7,7 +7,7 @@ const { insertValueOfBestTrait } = require("../services/insertValueOfBestTrait")
 
   
 mongoose
-  .connect(`mongodb://localhost/TellMeMyWorth`)
+  .connect(`mongodb+srv://WorthTeller:vhy4UuMu5ywD9J1BLz@tellmemyworth.6dbsv.mongodb.net/?retryWrites=true&w=majority`)
   .then(() => console.log("Connecting to MongoDB..."))
   .catch((err) => console.error("Could not connect to MongoDB...", err));
 
