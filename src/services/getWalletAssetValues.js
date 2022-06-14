@@ -85,6 +85,7 @@ async function getWalletAssetValues(walletAddr) {
             assetData["asset"] = element.display_name;
             assetData["value"] = element.valueOfBestTrait / 1000000;
             assetData["bestTrait"] = element.bestTrait.replace('attributes / ', '')
+              .replace(',undefined' || ', undefined', '')
               .replace(',' || ', ', ': ')
               .split(' ')
               .map((s) => s.charAt(0).toUpperCase() + s.substring(1))
