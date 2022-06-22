@@ -1,0 +1,5 @@
+{
+    "database_prod": "mongodb+srv://TellTwan:q23LUx8K0617E5pa@TellMeMyWorth-CoreDB-6341cc4d.mongo.ondigitalocean.com/TellMeMyWorth?authSource=admin&replicaSet=TellMeMyWorth-CoreDB&tls=true",
+    "database_dev": "mongodb://localhost/TellMeMyWorth"
+}
+

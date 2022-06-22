@@ -40,6 +40,8 @@ async function insertUniqueNftProject(policyId, collectionSize, database = "test
       policy_id: policyId,
       display_name: getCollectionName,
       traitsAreUnique: true,
+      fungible: false,
+      metaverse: false,
       collectionSize: collectionSize,
     };
 

@@ -4,16 +4,17 @@ const { getCollectionSize } = require("../services/getCollectionSize");
 const { insertUniqueNftProject } = require("../services/insertUniqueNftProject");
 const { insertFloorData } = require("../services/insertFloorData");
 const { insertValueOfBestTrait } = require("../services/insertValueOfBestTrait");
+const { configSetting } = require('../../config.js')
 
-  
-mongoose
-  .connect(`mongodb+srv://TellTwan:q23LUx8K0617E5pa@TellMeMyWorth-CoreDB-6341cc4d.mongo.ondigitalocean.com/TellMeMyWorth?authSource=admin&replicaSet=TellMeMyWorth-CoreDB&tls=true`)
+const database = configSetting()
+
+mongoose.connect(database)
   .then(() => console.log("Connecting to MongoDB..."))
   .catch((err) => console.error("Could not connect to MongoDB...", err));
 
 
 // Comment out line once complete!!
-async function allUniqueNftDataInsert(){
+async function allUniqueNftDataUpdate(){
     const policyIds = await getUniqueNftPolicyIds()
     policyIdArray = []
     for (let policyId of policyIds){
@@ -44,4 +45,4 @@ async function allUniqueNftDataInsert(){
     mongoose.disconnect();
 }
 
-allUniqueNftDataInsert()
+allUniqueNftDataUpdate()

@@ -12,11 +12,15 @@ async function getFingerprints(walletAddr) {
   //   const Wallet = mongoose.model("Wallets", walletSchema, "Wallets");
 
   const wallets = await Wallet.find({ addr: stakeAddr });
+  // console.log('/////////////////////////////////////////////////',wallets)
 
   // Create object to store fingerprints by policyId
   let policyFingerprints = {};
   // Create array of the fingerprints in the wallet searched for
   let walletFingerprints = [];
+
+  let assetQuantity = {};
+
 
   // go through each asset in a wallet and save them to the policyFingerprints objects.
   // Clear walletFingerprints if next policy is found
@@ -24,11 +28,23 @@ async function getFingerprints(walletAddr) {
     // console.log(asset.fingerprint)
     if (policyFingerprints.hasOwnProperty(asset.policy)) {
       walletFingerprints.push(asset.fingerprint);
+      assetData['quantity'] = asset.quantity;
+      assetData['assets'] = walletFingerprints;
+  
+      // walletFingerprints.push(asset.quantity);
     } else {
-      walletFingerprints = [];
+      walletFingerprints = [];    
+      assetData = {}
+      assetData['quantity'] = asset.quantity;
+  
       walletFingerprints.push(asset.fingerprint);
+      assetData['assets'] = walletFingerprints;
+
+      // walletFingerprints.push(asset.quantity);
     }
-    policyFingerprints[asset.policy] = walletFingerprints;
+
+    policyFingerprints[asset.policy] = assetData;
+    // console.log(policyFingerprints)
   });
 
   //   const PolicyId = mongoose.model("Policy_Ids", policyIdSchema, "Policy_Ids");
@@ -41,13 +57,16 @@ async function getFingerprints(walletAddr) {
       .select({ policy_id: 1, display_name: 1 })
       .limit(1);
 
+    // console.log(policyIdFound)
+
     if (policyIdFound.length > 0) {
-      policyFingerprints[policyIdFound[0].display_name] =
-        policyFingerprints[policyIdFound[0].policy_id];
+      policyFingerprints[policyIdFound[0].display_name] = policyFingerprints[policyIdFound[0].policy_id];
       delete policyFingerprints[policyIdFound[0].policy_id];
-      // console.log(policyIdFound[0].display_name)
+      // console.log(policyFingerprints[policyIdFound[0].display_name])
+      // console.log(policyFingerprints[policyIdFound[0].policy_id])
     }
   }
+  // console.log('##########################################',policyFingerprints )
 
   return policyFingerprints;
 }

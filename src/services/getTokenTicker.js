@@ -1,6 +1,6 @@
 const { PolicyId } = require("../models/policyId");
 
-async function getUniqueNftPolicyIds(database = "test") {
+async function getTokenTicker(policyId) {
   // mongoose.connect(`mongodb://localhost/TellMeMyWorth_Collections`)
   // mongoose.connect(`mongodb://localhost/TellMeMyWorth`)
   // .then(() => console.log('Connecting to MongoDB...'))
@@ -10,14 +10,13 @@ async function getUniqueNftPolicyIds(database = "test") {
   // const PolicyId = mongoose.model('Policy_Ids', policyIdSchema, 'Policy_Ids')
 
   // Find the policyId form the API call to jpg.store in the PolicyIds model
-  const policyIdFound = await PolicyId.find({
-    traitsAreUnique: { $eq: true },
-    fungible: { $eq: false },
-    metaverse: { $eq: false },
-  }).select({ policy_id: 1 });
+  const tickerFound = await PolicyId.find({
+    policy_id: policyId,
+  }).select({ display_name: 1 });
+//   console.log('===================',tickerFound[0].display_name)
 
   // mongoose.disconnect();
   // console.log(policyIdFound.policy_id)
-  return policyIdFound;
+  return tickerFound[0].display_name.replaceAll(" Token", "");
 }
-module.exports.getUniqueNftPolicyIds = getUniqueNftPolicyIds;
+module.exports.getTokenTicker = getTokenTicker;

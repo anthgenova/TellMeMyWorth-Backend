@@ -2,13 +2,16 @@ const mongoose = require("mongoose");
 const { insertUniqueNftProject } = require("../services/insertUniqueNftProject");
 const { insertFloorData } = require("../services/insertFloorData");
 const { insertValueOfBestTrait } = require("../services/insertValueOfBestTrait");
+const { configSetting } = require('../../config.js')
 
-mongoose.connect(`mongodb+srv://TellTwan:q23LUx8K0617E5pa@TellMeMyWorth-CoreDB-6341cc4d.mongo.ondigitalocean.com/TellMeMyWorth?authSource=admin&replicaSet=TellMeMyWorth-CoreDB&tls=true`)
+const database = configSetting()
+
+mongoose.connect(database)
   .then(() => console.log("Connecting to MongoDB..."))
   .catch((err) => console.error("Could not connect to MongoDB...", err));
 
-const policyId = "7d757d36ce79e19f224fd956aafe078d40f0999f944f36e42491def2";
-const collectionSize = 6666;
+const policyId = "40fa2aa67258b4ce7b5782f74831d46a84c59a0ff0c28262fab21728";
+const collectionSize = 10000;
 // insertWalletData(policyId, database)
 // walletAddress     = Wallet address ; can be addr or stake
 // database          = database to save to. DEFAULT = 'test'

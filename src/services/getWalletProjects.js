@@ -30,20 +30,25 @@ async function getWalletProjects(walletAddr) {
       const collectionModel = await fingerprint.replaceAll(" ", "_");
       // console.log(collectionModel)
 
+      
+
       // Check if the first letter in collectionModel is an uppercase letter.
       // policyIds are made up of numbers and lowercase, so this checks to make sure it is an actual collection in Mongo
       let firstLetter = collectionModel.charAt(0);
-      if (firstLetter == firstLetter.toUpperCase() && isNaN(firstLetter * 1)) {
+      if (firstLetter == firstLetter.toUpperCase() && isNaN(firstLetter * 1) && !collectionModel.includes('Token')) {
+        // console.log(collectionModel)
         const Nft = mongoose.model(
           `${collectionModel}`,
           nftSchema,
           `${collectionModel}`
         );
-        console.log(Nft)
 
         const nfts = await Nft.find({
-          fingerprint: { $in: fingerprints[fingerprint] },
+          fingerprint: { $in: fingerprints[fingerprint].assets },
         }).select({ policy_id: 1 });
+
+        // console.log(fingerprints[fingerprint].assets)
+
 
         // Create object to store each nft with their suggested value
         let assetBestTrait = {};
@@ -84,7 +89,7 @@ async function getWalletProjects(walletAddr) {
     // projects.push("Not Found")
   }
   // mongoose.disconnect();
-  console.log(projects);
+  // console.log('HHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHH',projects);
   return projects;
 }
 

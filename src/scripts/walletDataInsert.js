@@ -1,7 +1,10 @@
 const mongoose = require("mongoose");
 const { insertWalletData } = require("../services/insertWalletData");
+const { configSetting } = require('../../config.js')
 
-mongoose.connect(`mongodb+srv://TellTwan:q23LUx8K0617E5pa@TellMeMyWorth-CoreDB-6341cc4d.mongo.ondigitalocean.com/TellMeMyWorth?authSource=admin&replicaSet=TellMeMyWorth-CoreDB&tls=true`)
+const database = configSetting()
+
+mongoose.connect(database)
     .then(() => console.log('Connecting to MongoDB...'))
     .catch(err => console.error('Could not connect to MongoDB...', err));
 // insertWalletData(policyId, database)
