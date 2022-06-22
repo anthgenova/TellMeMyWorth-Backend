@@ -187,7 +187,10 @@ async function getWalletAssetValues(walletAddr) {
                   assetData = {};
                   let projectData = {};
 
-                  let value = ((token[0].valueOfToken * token[0].tokenValueMultiplier) * fingerprints[fingerprint].quantity)
+                  let tokenQuantity = fingerprints[fingerprint].quantity / Math.pow(10, (fingerprints[fingerprint].decimals))
+                  let tokenValue = (token[0].valueOfToken * token[0].tokenValueMultiplier)
+                  let value = ( tokenValue * tokenQuantity)
+                  // console.log(value)
                   // let valueArray = Array.from
                   // let valueLength = value.lastIndexOf(0)
                   if(value > .01){
@@ -198,9 +201,9 @@ async function getWalletAssetValues(walletAddr) {
                     assetData["asset"] = collectionModel.replaceAll("_", " ");
                     
                     // assetData["value"] = ((token[0].valueOfToken * token[0].tokenValueMultiplier) * fingerprints[fingerprint].quantity);
-                    assetData["value"] = twoDecimals(((token[0].valueOfToken * token[0].tokenValueMultiplier) * fingerprints[fingerprint].quantity));
+                    assetData["value"] = twoDecimals(value);
                     // assetData["valueBasedOn"] = `${fingerprints[fingerprint].quantity} ${collectionModel.replaceAll("_", " ").replaceAll("Token", "")} @ ${(token[0].valueOfToken * token[0].tokenValueMultiplier).toLocaleString("en-US")} ₳`;
-                    assetData["valueBasedOn"] = `${fingerprints[fingerprint].quantity} ${collectionModel.replaceAll("_", " ").replaceAll("Token", "")} @ ${(twoDecimals(token[0].valueOfToken * token[0].tokenValueMultiplier))} ₳`;
+                    assetData["valueBasedOn"] = `${twoDecimals(tokenQuantity)} ${collectionModel.replaceAll("_", " ").replaceAll("Token", "")} @ ${(twoDecimals(tokenValue))} ₳`;
                     assetData["optimized_source"] = `https://pool.pm/registry/${token[0].policy_id}/${collectionModel.replaceAll("_", "").replaceAll("Token", "")}/logo.png`;
                     // console.log('policyId',token[0].policy_id)
                     assetData["assetType"] = "Token";

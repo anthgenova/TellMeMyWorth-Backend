@@ -30,15 +30,19 @@ async function getFingerprints(walletAddr) {
       walletFingerprints.push(asset.fingerprint);
       assetData['quantity'] = asset.quantity;
       assetData['assets'] = walletFingerprints;
+      assetData['decimals'] = asset.decimals;
+      if(assetData.quantity > 1) {console.log('######################',asset.quantity, asset)}
   
       // walletFingerprints.push(asset.quantity);
     } else {
       walletFingerprints = [];    
       assetData = {}
       assetData['quantity'] = asset.quantity;
+      assetData['decimals'] = asset.decimals;
   
       walletFingerprints.push(asset.fingerprint);
       assetData['assets'] = walletFingerprints;
+      if(assetData.quantity > 1) {console.log('######################',asset['decimals'], asset)}
 
       // walletFingerprints.push(asset.quantity);
     }
