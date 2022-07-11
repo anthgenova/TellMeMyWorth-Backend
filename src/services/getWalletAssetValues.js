@@ -5,6 +5,7 @@ const { tokenSchema } = require("../models/schemas/tokenSchema");
 const { getMyWalletData } = require("../services/getMyWalletData");
 const { getFingerprints } = require("../services/getFingerprints");
 const { getTokenPolicyIds } = require("../services/getTokenPolicyIds");
+//const { getProjectfloorPrice } = require("../services/getProjectfloorPrice");
 
 function twoDecimals(n) {
   let log10 = n ? Math.floor(Math.log10(n)) : 0,
@@ -53,6 +54,7 @@ async function getWalletAssetValues(walletAddr) {
     assetData["valueBasedOn"] = "";
     assetData["optimized_source"] = "https://cryptologos.cc/logos/cardano-ada-logo.png";
     assetData["assetType"] = "Coin";
+    //assetData["floorPrice"] = "";
     allAssetsReal.push(assetData);
 
     allAssets["lifetimeReward"] = wallets[0].reward / 1000000;
@@ -109,6 +111,10 @@ async function getWalletAssetValues(walletAddr) {
             assetData = {};
             let projectData = {};
 
+            // console.log(`>>>>>>>>>>>>>>>>>> ${element.policy_id}`)
+
+
+            // let floorPrice = await getProjectfloorPrice(element.policy_id);
 
             console.log("element", element);
             // console.log(element.valueOfBestTrait)
@@ -127,9 +133,14 @@ async function getWalletAssetValues(walletAddr) {
               .split(' ')
               .map((s) => s.charAt(0).toUpperCase() + s.substring(1))
               .join(' ');
-              assetData["optimized_source"] = "https://storage.googleapis.com/jpeg-optim-files/" + element.source;
+              // assetData["optimized_source"] = "https://storage.googleapis.com/jpeg-optim-files/" + element.source;
+              // assetData["optimized_source"] = "https://images.jpgstoreapis.com/" + element.source;
+              const CID = require('cids')
+              const cid = new CID(element.source).toV1().toString('base32')
+              assetData["optimized_source"] = "https://" + cid +".ipfs.infura-ipfs.io";
               assetData["assetType"] = "Unique Nft";
-              allAssetsReal.push(assetData);
+            // assetData["floorPrice"] = "";
+            allAssetsReal.push(assetData);
           });
         } catch {}
         if (Object.values(assetBestTrait).length > 0) {
@@ -187,6 +198,8 @@ async function getWalletAssetValues(walletAddr) {
                   assetData = {};
                   let projectData = {};
 
+                  // let floorPrice = await getProjectfloorPrice(token[0].policy_id);
+
                   let tokenQuantity = fingerprints[fingerprint].quantity / Math.pow(10, (fingerprints[fingerprint].decimals))
                   let tokenValue = (token[0].valueOfToken * token[0].tokenValueMultiplier)
                   let value = ( tokenValue * tokenQuantity)
@@ -207,6 +220,7 @@ async function getWalletAssetValues(walletAddr) {
                     assetData["optimized_source"] = `https://pool.pm/registry/${token[0].policy_id}/${collectionModel.replaceAll("_", "").replaceAll("Token", "")}/logo.png`;
                     // console.log('policyId',token[0].policy_id)
                     assetData["assetType"] = "Token";
+                    // assetData["floorPrice"] = floorPrice;
 
                     allAssetsReal.push(assetData);
                   }
