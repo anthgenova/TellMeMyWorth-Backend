@@ -12,7 +12,7 @@ async function denestObject(nft, i = 1, metadataArray = []){
   // console.log(nft)
   // console.log(nft.onchain_metadata)
   // console.log(Object.entries(nft.onchain_metadata))
-  // try{
+  try{
   Object.entries(nft).forEach(async metadata =>{
     if (Array.isArray(metadata[1])) {
       // console.log('this IS an array')
@@ -53,6 +53,8 @@ async function denestObject(nft, i = 1, metadataArray = []){
     // }
 
   })
+} catch {}
+
   // if ( i===1){
   //   globalMetadataArray.push(thisMetadata)
   //   // console.log (globalMetadataArray)
