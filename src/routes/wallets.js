@@ -1,5 +1,5 @@
-const { getWalletAssetValues } = require("../services/getWalletAssetValues");
-const { insertWalletData } = require("../services/insertWalletData");
+const { getWalletAssetValues } = require("../services/getWalletAssetValuesNew");
+const { insertWalletData } = require("../services/insertWalletDataNew");
 // const mongoose = require("mongoose");
 const express = require("express");
 const router = express.Router();
@@ -12,8 +12,9 @@ router.get("/:addr", async (req, res) => {
 
 router.get("/insert/:addr", async (req, res) => {
   console.log(req.params.addr);
-  await insertWalletData(req.params.addr);
-  res.send({message:'thank you'})
+  let walletCount = await insertWalletData(req.params.addr);
+  // res.send({message:'thank you'})
+  res.send({count: walletCount})
 });
 
 module.exports = router;

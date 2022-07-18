@@ -1,8 +1,14 @@
-const { getWalletProjects } = require("../services/getWalletProjects");
+// const { getWalletProjects } = require("../services/getWalletProjects");
+const { getWalletProjects } = require("../services/getWalletProjectsNew");
 // const mongoose = require("mongoose");
 const express = require("express");
 const router = express.Router();
 
+// router.get("/:addr", async (req, res) => {
+//   console.log(req.params.addr);
+//   const projectData = await getWalletProjects(req.params.addr);
+//   res.send(projectData);
+// });
 router.get("/:addr", async (req, res) => {
   console.log(req.params.addr);
   const projectData = await getWalletProjects(req.params.addr);
