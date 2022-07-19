@@ -1,7 +1,9 @@
 const mongoose = require("mongoose");
 let { bech32 } = require('bech32')
+const CID = require('cids')
 const { Wallet } = require("../models/wallet");
 const { PolicyId } = require("../models/policiesTest");
+const { Token } = require("../models/tokens");
 const blockfrost = require("../apiServices/blockfrostApi");
 const { nftSchema } = require("../models/schemas/nftSchemaNew");
 const { tokenSchema } = require("../models/schemas/tokenSchema");
@@ -82,6 +84,20 @@ async function getWalletAssetValues(walletAddr) {
                 tokens: 1
             // reward: 1,
           });
+        
+        let assetPoliciesAndFingerprintsFound = {}
+        walletData[0].tokens.forEach(token =>{
+            // console.log(token.fingerprint)
+            // console.log(token.policy)
+            if(!assetPoliciesAndFingerprintsFound[token.policy]){
+                assetPoliciesAndFingerprintsFound[token.policy] = []
+            }
+            assetPoliciesAndFingerprintsFound[token.policy].push([token.fingerprint, token.quantity, token.decimals, token.name])
+            // console.log(token)
+        })
+        // console.log((assetPoliciesAndFingerprintsFound))
+    
+    
         // console.log(walletData)
         //   if (wallets.length === 1){
         if (walletData.length === 1){
@@ -98,15 +114,227 @@ async function getWalletAssetValues(walletAddr) {
         //assetData["floorPrice"] = "";
         allAssetsReal.push(assetData);
         } 
+
     
-        // console.log(walletData.tokens)
-        // for (let asset of walletData.tokens) {
-        //     console.log(asset)
-        // }
+        const myTokens = await Token.find({
+            policy_id: {$in: Object.keys(assetPoliciesAndFingerprintsFound)},
+            show: true
+          })
+          .select({
+              policy_id: 1,
+              asset_name: 1,
+              valueOfToken: 1,
+              tokenValueMultiplier: 1,
+            });
+
+
+
+        console.log(myTokens)
+        let tokenPoliciesUsed = []
+        for(const myToken of myTokens){
+            assetData = {};
+            let projectData = {};
+
+
+            // console.log(walletData[0].tokens)
+            console.log(myToken)
+            // console.log(assetPoliciesAndFingerprintsFound[myToken.policy_id][0][1])
+            const quantity = assetPoliciesAndFingerprintsFound[myToken.policy_id][0][1]
+            let decimals = 0
+            // console.log('*******************')
+            // console.log(myToken)
+            try {
+             decimals = assetPoliciesAndFingerprintsFound[myToken.policy_id][0][2]
+             if( decimals === undefined || decimals === 'undefined' || decimals === null || !Boolean(decimals)){
+                 decimals = 0
+                 console.log(decimals)
+                }
+            } catch{
+                // const decimals = 0
+            }
+            // console.log(decimals)
+            // let floorPrice = await getProjectfloorPrice(token[0].policy_id);
+
+            let tokenQuantity = quantity / Math.pow(10, (decimals))
+            let tokenValue = (myToken.valueOfToken * myToken.tokenValueMultiplier)
+            // console.log(tokenValue)
+            let value = ( tokenValue * tokenQuantity)
+            // console.log(value)
+            // // let valueArray = Array.from
+            // // let valueLength = value.lastIndexOf(0)
+            if(value > .01){
+              assetData["_id"] = myToken.policy_id;
+              projectData["_id"] = myToken.policy_id;
+              projectData["name"] = myToken.asset_name;
+              assetData["project"] = projectData;
+              assetData["asset"] = myToken.asset_name;
+              
+              // assetData["value"] = ((myToken.valueOfToken * myToken.tokenValueMultiplier) * fingerprints[fingerprint].quantity);
+              assetData["value"] = twoDecimals(value);
+              // assetData["valueBasedOn"] = `${fingerprints[fingerprint].quantity} ${collectionModel.replaceAll("_", " ").replaceAll("Token", "")} @ ${(myToken.valueOfToken * myToken.tokenValueMultiplier).toLocaleString("en-US")} ₳`;
+              assetData["valueBasedOn"] = `${twoDecimals(tokenQuantity)} ${myToken.asset_name} @ ${(twoDecimals(tokenValue))} ₳`;
+              //assetData["optimized_source"] = `https://pool.pm/registry/${myToken.policy_id}/${collectionModel.replaceAll("_", "").replaceAll("Token", "")}/logo.png`;
+              // console.log('policyId',token[0].policy_id)
+              assetData["assetType"] = "Token";
+              // assetData["floorPrice"] = floorPrice;
+// console.log(assetData)
+              allAssetsReal.push(assetData);
+                
+              tokenPoliciesUsed.push(myToken.policy_id)
+            }
+            
+        }
+        delete assetPoliciesAndFingerprintsFound[tokenPoliciesUsed]
+        // console.log(Object.keys(assetPoliciesAndFingerprintsFound))
+
+        projectDataDb = await PolicyId
+            .find({policies: {$in: Object.keys(assetPoliciesAndFingerprintsFound)}})
+            .select(
+                { 
+                    policies: 1,
+                    collection_name: 1, 
+                    floor: 1, 
+                    metaverse: 1 
+                }
+            )
+        let projectList = {}
+        projectDataDb.forEach(project =>{
+            projectList[project.policies] = [project.collection_name, project.metaverse, project.floor]
+        })
+        // console.log(projectList)
+
+
         
         // await walletData.tokens.forEach(async asset => {
-            for (let asset of walletData[0].tokens) {
+            // console.log(Object.keys(assetPoliciesAndFingerprintsFound))
+            for (let collection of Object.keys(assetPoliciesAndFingerprintsFound)) {
+                // console.log(collection)
+                // console.log(assetPoliciesAndFingerprintsFound[collection])
 
+                let collectionFingerprints = []
+
+                assetPoliciesAndFingerprintsFound[collection].forEach(fingerprint => {
+                    collectionFingerprints.push(fingerprint[0])
+                })
+                // console.log(collectionFingerprints)
+
+                // try{
+                const Nft = mongoose.model(collection, nftSchema, collection);
+
+                const assetDataDb = await Nft
+                    .find({fingerprint: {$in: collectionFingerprints}})
+                    .select({ onchain_metadata: 1, valueOfBestTrait: 1, bestTrait: 1, fingerprint: 1 })
+                for(let asset of assetDataDb){
+                        // console.log('----------------------------')
+                        // try{
+                                            // console.log(asset)
+                        // } catch{}
+                    assetData = {}
+                    projectData = {}
+    
+                    assetData["_id"] = asset.fingerprint;
+                    projectData["_id"] = collection;
+                    projectData["name"] = projectList[collection][0];
+                    assetData["project"] = projectData;
+                    try{
+                        assetData["asset"] = asset.onchain_metadata.name;
+                    } catch {
+                        assetData["asset"] = asset.fingerprint;
+                    }
+
+                    if(assetDataDb[0].valueOfBestTrait === 0 || projectList[collection][1] === true ){
+                        if (projectList[collection][2] === null){
+                            assetData["value"] = 0;
+                        } else {
+                            assetData["value"] = projectList[collection][2];
+                        }
+                        assetData["valueBasedOn"] = 'Floor'
+                    } else if (assetDataDb[0].valueOfBestTrait === projectList[collection][2]){
+                        assetData["value"] = projectList[collection][2];
+                        assetData["valueBasedOn"] = 'Floor'
+                    } else {
+                        assetData["value"] = asset.valueOfBestTrait;
+                        assetData["valueBasedOn"] = asset.bestTrait.replace('attributes / ', '')
+                            .replace(',undefined' || ', undefined', '')
+                            .replace(',' || ', ', ': ')
+                            .split(' ')
+                            .map((s) => s.charAt(0).toUpperCase() + s.substring(1))
+                            .join(' ');
+                    }
+
+                    try{
+                        const cid = new CID(asset.onchain_metadata.image.replace('ipfs/', '').replace('ipfs://', '')).toV1().toString('base32')
+                        assetData["optimized_source"] = "https://" + cid +".ipfs.infura-ipfs.io";
+                    } catch{}
+                    assetData["assetType"] = "Nft";
+                    allAssetsReal.push(assetData);
+
+
+
+
+
+
+
+                }
+                    /*
+                console.log(assetDataDb)
+
+    
+                    assetData = {}
+                    projectData = {}
+    
+                    console.log(projectDataDb[0].collection_name)
+                    console.log(asset.policy)
+        
+                    assetData["_id"] = asset.fingerprint;
+                    projectData["_id"] = asset.policy;
+                    // if(projectDataDb[0].collection_name === (null || undefined)){
+                    //     projectData["name"] = asset.policy;
+                    // } else {
+                    projectData["name"] = projectDataDb[0].collection_name;
+                    // }
+                    assetData["project"] = projectData;
+                    assetData["asset"] = assetDataDb[0].onchain_metadata.name;
+                    if(assetDataDb[0].valueOfBestTrait === 0 || projectDataDb[0].metaverse === true){
+                        if (projectDataDb[0].floor === null){
+                            assetData["value"] = 0;
+                        } else {
+                            assetData["value"] = projectDataDb[0].floor;
+                        }
+                        assetData["valueBasedOn"] = 'Floor'
+                    } else {
+                        assetData["value"] = assetDataDb[0].valueOfBestTrait;
+                        assetData["valueBasedOn"] = assetDataDb[0].bestTrait.replace('attributes / ', '')
+                          .replace(',undefined' || ', undefined', '')
+                          .replace(',' || ', ', ': ')
+                          .split(' ')
+                          .map((s) => s.charAt(0).toUpperCase() + s.substring(1))
+                          .join(' ');
+                    }
+                      // assetData["optimized_source"] = "https://storage.googleapis.com/jpeg-optim-files/" + assetDataDb.source;
+                      // assetData["optimized_source"] = "https://images.jpgstoreapis.com/" + assetDataDb.source;
+                      const CID = require('cids')
+                      const cid = new CID(assetDataDb[0].onchain_metadata.image.replace('ipfs/', '').replace('ipfs://', '')).toV1().toString('base32')
+                      assetData["optimized_source"] = "https://" + cid +".ipfs.infura-ipfs.io";
+                      assetData["assetType"] = "Unique Nft";
+                    // assetData["floorPrice"] = "";
+                    
+                    // console.log(allAssetsReal)
+                    // console.log(assetData)
+                    allAssetsReal.push(assetData);
+                    // console.log(allAssetsReal)
+                    
+    
+                    
+                    // console.log(allAssetsReal)
+                } catch (err){
+                    // console.log(':::::::::::::::::::::')
+                    // console.log(err)
+                    // console.log(projectDataDb)
+                }
+                // allAssetsReal.push(assetData);
+    
+                /*
             const Nft = mongoose.model(asset.policy, nftSchema, asset.policy);
             // console.log(asset.policy)
             // const assetDataDb = await Nft
@@ -189,224 +417,13 @@ async function getWalletAssetValues(walletAddr) {
             
             // console.log(allAssetsReal)
             // console.log(assetData)
-        }
+
+            */
+        }  
         // console.log(allAssetsReal)
-        // console.log(walletData.tokens)
-
-/*
-    const fingerprints = await getFingerprints(stakeAddr);
-
-    const tokenPolicyIds = await getTokenPolicyIds()
-
-    let tokenPolicyIdList = []
-    tokenPolicyIds.forEach((tokenPolicyId) =>
-      tokenPolicyIdList.push(tokenPolicyId.policy_id)
-    )
-      console.log(tokenPolicyIdList)
-
-    // Create object to store the wallet's asset values in
-    let allAssets = {};
-    // let allAssetsReal = []
-    let assetData = {};
-    let projectData = {};
-
-    // const Wallet = mongoose.model("Wallets", walletSchema, "Wallets");
-    const wallets = await Wallet.find({ addr: stakeAddr }).select({
-      lovelaces: 1,
-      reward: 1,
-    });
-    allAssets["ada"] = wallets[0].lovelaces / 1000000;
-
-    assetData["_id"] = walletAddr;
-    projectData["_id"] = walletAddr;
-    projectData["name"] = "ADA";
-    assetData["project"] = projectData;
-    assetData["asset"] = "ADA";
-    assetData["value"] = twoDecimals(wallets[0].lovelaces / 1000000);
-    assetData["valueBasedOn"] = "";
-    assetData["optimized_source"] = "https://cryptologos.cc/logos/cardano-ada-logo.png";
-    assetData["assetType"] = "Coin";
-    //assetData["floorPrice"] = "";
-    allAssetsReal.push(assetData);
-
-    allAssets["lifetimeReward"] = wallets[0].reward / 1000000;
-
-    for (let fingerprint in fingerprints) {
-      // Create the Model name in the correct format to querry MongoDb
-      let collectionModel = await fingerprint.replaceAll(" ", "_");
-      console.log('FINGERPRINT' + collectionModel)
-
-      if(collectionModel.includes('Token')){
-        // console.log('MADE IT HERE',`'${collectionModel}'`)
-
-        let lengthOfProjectName = collectionModel.indexOf('_Token')
-        // console.log(lengthOfProjectName)
-        // collectionModel = collectionModel.substring(0, lengthOfProjectName).toUpperCase() + '_Token'
-        collectionModel = collectionModel.substring(0, lengthOfProjectName) + '_Token'
-
-        // console.log(collectionModel)
-      }
-
-      // Check if the first letter in collectionModel is an uppercase letter.
-      // policyIds are made up of numbers and lowercase, so this checks to make sure it is an actual collection in Mongo
-      let firstLetter = collectionModel.charAt(0);
-      if (firstLetter == firstLetter.toUpperCase() && isNaN(firstLetter * 1) && !collectionModel.includes('Token')) {
-
-        const Nft = mongoose.model(
-          `${collectionModel}`,
-          nftSchema,
-          `${collectionModel}`
-        );
-        console.log(fingerprints[fingerprint].assets)
-
-        // console.log(fingerprints[fingerprint])
-        const nfts = await Nft.find({
-          fingerprint: { $in: fingerprints[fingerprint].assets },
-        }).select({
-          valueOfBestTrait: 1,
-          bestTrait: 1,
-          fingerprint: 1,
-          display_name: 1,
-          policy_id: 1,
-          source: 1,
-        });
-
-        if(collectionModel === 'HOSKY_Token') console.log('HOSKY', (fingerprint))
+  
 
 
-        // Create object to store each nft with their suggested value
-        let assetBestTrait = {};
-
-        // Tries to open the model for the collection. Will work if it is in the Database, if not it skips this policId
-        try {
-          nfts.forEach((element) => {
-            assetData = {};
-            let projectData = {};
-
-            // console.log(`>>>>>>>>>>>>>>>>>> ${element.policy_id}`)
-
-
-            // let floorPrice = await getProjectfloorPrice(element.policy_id);
-
-            console.log("element", element);
-            // console.log(element.valueOfBestTrait)
-            assetBestTrait[element.display_name] =
-              element.valueOfBestTrait / 1000000;
-
-            assetData["_id"] = element.fingerprint;
-            projectData["_id"] = element.policy_id;
-            projectData["name"] = collectionModel.replaceAll("_", " ");
-            assetData["project"] = projectData;
-            assetData["asset"] = element.display_name;
-            assetData["value"] = element.valueOfBestTrait / 1000000;
-            assetData["valueBasedOn"] = element.bestTrait.replace('attributes / ', '')
-              .replace(',undefined' || ', undefined', '')
-              .replace(',' || ', ', ': ')
-              .split(' ')
-              .map((s) => s.charAt(0).toUpperCase() + s.substring(1))
-              .join(' ');
-              // assetData["optimized_source"] = "https://storage.googleapis.com/jpeg-optim-files/" + element.source;
-              // assetData["optimized_source"] = "https://images.jpgstoreapis.com/" + element.source;
-              const CID = require('cids')
-              const cid = new CID(element.source).toV1().toString('base32')
-              assetData["optimized_source"] = "https://" + cid +".ipfs.infura-ipfs.io";
-              assetData["assetType"] = "Unique Nft";
-            // assetData["floorPrice"] = "";
-            allAssetsReal.push(assetData);
-          });
-        } catch {}
-        if (Object.values(assetBestTrait).length > 0) {
-          allAssets[collectionModel.replaceAll("_", " ")] = assetBestTrait;
-        }
-
-        
-        
-        
-      // } else if (firstLetter == firstLetter.toUpperCase() && isNaN(firstLetter * 1) && collectionModel.includes('Token')) {
-      } else if (collectionModel.includes('Token')) {
-        try{
-        // console.log(Boolean(Nft))
-          if(collectionModel.includes('Token')){
-            console.log('MADE IT HERE',`'${collectionModel}'`)
-
-            // const tokenSchem = new mongoose.Schema(
-            //   {
-            //     policy_id: { type: String, default: " " },
-            //     asset_name: { type: String, default: " " },
-            //     valueOfToken: { type: Number, default: 0 },
-            //     traitsAreUnique: { type: Boolean, default: true },
-            //     optimized_source: { type: String, default: " " },
-            //     date: { type: Date, default: Date.now },
-            //   },
-            // );
-            
-
-            const Token = mongoose.model(
-              `${collectionModel}`,
-              tokenSchema,
-              `${collectionModel}`
-            );
-    
-            console.log(Token)
-    
-            // const Token = mongoose.model(
-            //   `${collectionModel}`,
-            //   tokenSchema,
-            //   `${collectionModel}`
-            //   );
-              
-              // console.log('ALSO MADE IT HERE',Token)
-              const token = await Token.find({
-                policy_id: {$in: tokenPolicyIdList}
-              })
-              .select({
-                  policy_id: 1,
-                  valueOfToken: 1,
-                  tokenValueMultiplier: 1,
-                });
-                // console.log('token',token)
-                
-                // try {
-                  assetData = {};
-                  let projectData = {};
-
-                  // let floorPrice = await getProjectfloorPrice(token[0].policy_id);
-
-                  let tokenQuantity = fingerprints[fingerprint].quantity / Math.pow(10, (fingerprints[fingerprint].decimals))
-                  let tokenValue = (token[0].valueOfToken * token[0].tokenValueMultiplier)
-                  let value = ( tokenValue * tokenQuantity)
-                  // console.log(value)
-                  // let valueArray = Array.from
-                  // let valueLength = value.lastIndexOf(0)
-                  if(value > .01){
-                    assetData["_id"] = token[0].policy_id;
-                    projectData["_id"] = token[0].policy_id;
-                    projectData["name"] = collectionModel.replaceAll("_", " ");
-                    assetData["project"] = projectData;
-                    assetData["asset"] = collectionModel.replaceAll("_", " ");
-                    
-                    // assetData["value"] = ((token[0].valueOfToken * token[0].tokenValueMultiplier) * fingerprints[fingerprint].quantity);
-                    assetData["value"] = twoDecimals(value);
-                    // assetData["valueBasedOn"] = `${fingerprints[fingerprint].quantity} ${collectionModel.replaceAll("_", " ").replaceAll("Token", "")} @ ${(token[0].valueOfToken * token[0].tokenValueMultiplier).toLocaleString("en-US")} ₳`;
-                    assetData["valueBasedOn"] = `${twoDecimals(tokenQuantity)} ${collectionModel.replaceAll("_", " ").replaceAll("Token", "")} @ ${(twoDecimals(tokenValue))} ₳`;
-                    assetData["optimized_source"] = `https://pool.pm/registry/${token[0].policy_id}/${collectionModel.replaceAll("_", "").replaceAll("Token", "")}/logo.png`;
-                    // console.log('policyId',token[0].policy_id)
-                    assetData["assetType"] = "Token";
-                    // assetData["floorPrice"] = floorPrice;
-
-                    allAssetsReal.push(assetData);
-                  }
-                }
-        } catch {}
-        console.log('TOKEN')
-      }
-
-
-      
-    }  
-    
-
-*/
   } catch {}
 
 
@@ -416,6 +433,6 @@ async function getWalletAssetValues(walletAddr) {
 //   console.log(allAssetsReal);
   return allAssetsReal;
 }
-// getWalletAssetValues('take1uyx0wny64r8tvdp2khw3h9kfqpznee8f0v2774zsunmp5cgsy3503')
+// getWalletAssetValues('stake1u8t4fysrsg2s0dr9aefc7kmhzzr227zfhj9j8fck6ln972s6l68ze')
 
 exports.getWalletAssetValues = getWalletAssetValues;
