@@ -5,84 +5,91 @@ const { nftSchema } = require("../models/schemas/nftSchemaNew");
 
 let globalMetadataArray = []
 
-async function denestObject(nft, i = 1, metadataArray = []){
-  // console.log(nft)
-  // let metadataArray = []
-  let thisMetadata = ''
-  // console.log(nft)
-  // console.log(nft.onchain_metadata)
-  // console.log(Object.entries(nft.onchain_metadata))
-  try{
-  Object.entries(nft).forEach(async metadata =>{
-    if (Array.isArray(metadata[1])) {
-      // console.log('this IS an array')
-      metadata[1].forEach(async (trait) => {
-        // if (typeof metadata[1] === 'object'){
-        //   await denestObject(metadata[1], i++)
+async function denestObject(nft, i = 1, metadataArray = [], keyPassed = ''){
+    // console.log(nft)
+    // console.log(keyPassed)
+    // let metadataArray = []
+    let thisMetadata = ''
+    // console.log(nft)
+    // console.log(nft.onchain_metadata)
+    // console.log(Object.entries(nft.onchain_metadata))
+    // try{
+      try{
+    Object.entries(nft).forEach(async metadata =>{
+      if (Array.isArray(metadata[1])) {
+        // console.log('this IS an array')
+        metadata[1].forEach(async (trait) => {
+          // if (typeof metadata[1] === 'object'){
+          //   await denestObject(metadata[1], i++)
+    
+          // } else {
+          // console.log(typeof metadata[1] + metadata[1].toString())
+          thisMetadata = trait.toString().replace(':', ',')
+          // }
+          // console.log(trait)
+          globalMetadataArray.push(thisMetadata)
   
-        // } else {
-        // console.log(typeof metadata[1] + metadata[1].toString())
-        thisMetadata = trait.toString().replace(':', ',')
+        });
+      
+      } else if (typeof metadata[1] === 'object'){
+        // let nestObject = metadata[1]
+        // console.log(await denestObject(metadata[1]))
+        // console.log((metadata[1]))
+        // console.log(await denestObject(metadata[1]))
+        // try{
+        // let objectToString = await denestObject(metadata[1], i++)
+        thisMetadata = metadata[0] + ' / ' + await denestObject(metadata[1], i++, [], metadata[0])
+  
+        // console.log(thisMetadata)
+        // } catch {
+  
         // }
-        // console.log(trait)
         metadataArray.push(thisMetadata)
-
-      });
-    
-    } else if (typeof metadata[1] === 'object'){
-      // let nestObject = metadata[1]
-      // console.log(await denestObject(metadata[1]))
-      // console.log((metadata[1]))
-      // console.log(await denestObject(metadata[1]))
-      // try{
-      // let objectToString = await denestObject(metadata[1], i++)
-      thisMetadata = metadata[0] + ' / ' + await denestObject(metadata[1], i++)
-
-      // console.log(thisMetadata)
-      // } catch {
-
-      // }
-      metadataArray.push(thisMetadata)
-    } else {
-      thisMetadata = metadata[0] + ', ' + metadata[1]
-      metadataArray.push(thisMetadata)
-    } 
+      } else {
+        if(keyPassed){
+          thisMetadata = keyPassed + ' / ' + metadata[0] + ', ' + metadata[1]
+        } else {
+          thisMetadata = metadata[0] + ', ' + metadata[1]
+        }
+        globalMetadataArray.push(thisMetadata)
+      } 
+      // if ( i===1){
+        // globalMetadataArray.push(thisMetadata)
+        // // console.log (thisMetadata)
+        // }
+        
+      })
+    } catch {}
     // if ( i===1){
-    // globalMetadataArray.push(thisMetadata)
-    // // console.log (thisMetadata)
-    // }
-
-  })
-} catch {}
-
-  // if ( i===1){
-  //   globalMetadataArray.push(thisMetadata)
-  //   // console.log (globalMetadataArray)
-  //   }
-
-  // if(i>2) console.log(i + thisMetadata)
-// console.log(metadataArray)
-// } catch { }
-// console.log (globalMetadataArray)
-return metadataArray
-// Object.entries(nestedObject).forEach(metadataObject =>{
-  //   if (Array.isArray(metadataObject[1])) {
-  //     // console.log('this IS an array')
-
-  //     metadataObject[1].forEach((trait) => {
-  //       let formatedTrait = trait.toString().replace(':', ',')
-  //       console.log(formatedTrait)
-  //       metadataArray.push(formatedTrait)
-
-  //     });
-    
-  //   } else {
-  //     thisMetadataObject = metadataObject[0] + ', ' + metadataObject[1]
-  //     metadataArray.push(thisMetadataObject)
-  //   } 
-  // })
-}
-
+    //   globalMetadataArray.push(thisMetadata)
+    //   // console.log (globalMetadataArray)
+    //   }
+  
+    // if(i>2) console.log(i + thisMetadata)
+  // console.log(metadataArray)
+  // } catch { }
+  // console.log (globalMetadataArray)
+//   console.log(metadataArray)
+  return globalMetadataArray
+  // Object.entries(nestedObject).forEach(metadataObject =>{
+    //   if (Array.isArray(metadataObject[1])) {
+    //     // console.log('this IS an array')
+  
+    //     metadataObject[1].forEach((trait) => {
+    //       let formatedTrait = trait.toString().replace(':', ',')
+    //       console.log(formatedTrait)
+    //       metadataArray.push(formatedTrait)
+  
+    //     });
+      
+    //   } else {
+    //     thisMetadataObject = metadataObject[0] + ', ' + metadataObject[1]
+    //     metadataArray.push(thisMetadataObject)
+    //   } 
+    // })
+  }
+  
+  
 async function denestArray(nestedArray){
 
 }
@@ -133,18 +140,19 @@ async function updateAllNftFloors() {
                     // console.log(floor.trait_floors[0])
                     if(floor.trait_floors[0][assetMetada] !== undefined){
                       traitValues[assetMetada] = floor.trait_floors[0][assetMetada]
-                    } else if (floor.trait_floors[0][assetMetada.toLowerCase()] !== undefined){
-                      traitValues[assetMetada] = floor.trait_floors[0][assetMetada.toLowerCase()]
-                    }
-                  })
+                    } else if (floor.trait_floors[0][Object.keys(floor.trait_floors[0]).find(key => key.toLowerCase() === assetMetada.toLowerCase())] !== undefined){
+                        // console.log('2')
+                        traitValues[assetMetada] = floor.trait_floors[0][Object.keys(floor.trait_floors[0]).find(key => key.toLowerCase() === assetMetada.toLowerCase())]
+                      } 
+                    })
                   // console.log(traitValues)
                   let bestTraitAndValue = Object.entries(traitValues).sort((x, y) => y[1] - x[1])[0]
 
                   if(bestTraitAndValue){
-                    console.log(bestTraitAndValue[1])
-                    console.log(bestTraitAndValue[0])
-                    console.log(nft.fingerprint)
-                    console.log(Nft)
+                    // console.log(bestTraitAndValue[1])
+                    // console.log(bestTraitAndValue[0])
+                    // console.log(nft.fingerprint)
+                    // console.log(Nft)
                   
                   await Nft.updateOne(
                     { fingerprint: nft.fingerprint },
@@ -157,7 +165,7 @@ async function updateAllNftFloors() {
                     }
                   )
                   }
-                  console.log(bestTraitAndValue)
+                //   console.log(bestTraitAndValue)
                   
                   // console.log(Object.keys(globalMetadataArray).reduce((a, b) => obj[a] > obj[b] ? a : b))
                   /*
