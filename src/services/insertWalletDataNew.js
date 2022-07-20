@@ -144,5 +144,5 @@ async function insertWalletData(walletAddr, database = 'test'){
     // mongoose.disconnect();
 }
 
-insertWalletData('$quackquack')
+// insertWalletData('$quackquack')
 exports.insertWalletData = insertWalletData;

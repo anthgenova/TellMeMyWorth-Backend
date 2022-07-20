@@ -35,9 +35,9 @@ async function decodeAddress(walletAddr){
 }
 
 async function getWalletAssetValues(walletAddr) {
-      mongoose.connect(`mongodb+srv://TellTwan:q23LUx8K0617E5pa@TellMeMyWorth-CoreDB-6341cc4d.mongo.ondigitalocean.com/TellMeMyWorth?authSource=admin&replicaSet=TellMeMyWorth-CoreDB&tls=true`)
-          .then(() => console.log('Connecting to MongoDB...'))
-          .catch(err => console.error('Could not connect to MongoDB...', err));
+    //   mongoose.connect(`mongodb+srv://TellTwan:q23LUx8K0617E5pa@TellMeMyWorth-CoreDB-6341cc4d.mongo.ondigitalocean.com/TellMeMyWorth?authSource=admin&replicaSet=TellMeMyWorth-CoreDB&tls=true`)
+    //       .then(() => console.log('Connecting to MongoDB...'))
+    //       .catch(err => console.error('Could not connect to MongoDB...', err));
     let assets = [];
     let allAssetsReal = []
 
@@ -437,6 +437,6 @@ async function getWalletAssetValues(walletAddr) {
 //   console.log(allAssetsReal);
   return allAssetsReal;
 }
-getWalletAssetValues('$lifesgood')
+// getWalletAssetValues('$lifesgood')
 
 exports.getWalletAssetValues = getWalletAssetValues;

@@ -261,6 +261,6 @@ async function updateAllNftFloors() {
             }
             // })
 }
-updateAllNftFloors()
+// updateAllNftFloors()
 exports.updateAllNftFloors = updateAllNftFloors;
     
