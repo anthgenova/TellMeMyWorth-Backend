@@ -35,10 +35,9 @@ async function decodeAddress(walletAddr){
 }
 
 async function getWalletAssetValues(walletAddr) {
-    //     mongoose.connect(`mongodb://localhost/TellMeMyWorth`)
-    // .then(() => console.log('Connecting to MongoDB...'))
-    // .catch(err => console.error('Could not connect to MongoDB...', err));
-
+      mongoose.connect(`mongodb+srv://TellTwan:q23LUx8K0617E5pa@TellMeMyWorth-CoreDB-6341cc4d.mongo.ondigitalocean.com/TellMeMyWorth?authSource=admin&replicaSet=TellMeMyWorth-CoreDB&tls=true`)
+          .then(() => console.log('Connecting to MongoDB...'))
+          .catch(err => console.error('Could not connect to MongoDB...', err));
     let assets = [];
     let allAssetsReal = []
 
@@ -76,7 +75,7 @@ async function getWalletAssetValues(walletAddr) {
         let projectData = {};
 
 
-        // console.log(walletData)
+        // console.log(stakeAddr)
         
         // const wallets = await Wallet.find({ addr: stakeAddr }).select({
         const walletData = await Wallet.find({ addr: stakeAddr }).select({
@@ -199,16 +198,18 @@ async function getWalletAssetValues(walletAddr) {
             )
         let projectList = {}
         projectDataDb.forEach(project =>{
+            // console.log(project)
             projectList[project.policies] = [project.collection_name, project.metaverse, project.floor]
         })
-        // console.log(projectList)
+        console.log(projectList)
 
 
         
         // await walletData.tokens.forEach(async asset => {
-            // console.log(Object.keys(assetPoliciesAndFingerprintsFound))
+            console.log(Object.keys(assetPoliciesAndFingerprintsFound))
             for (let collection of Object.keys(assetPoliciesAndFingerprintsFound)) {
-                // console.log(collection)
+                try{
+                console.log(collection)
                 // console.log(assetPoliciesAndFingerprintsFound[collection])
 
                 let collectionFingerprints = []
@@ -227,7 +228,7 @@ async function getWalletAssetValues(walletAddr) {
                 for(let asset of assetDataDb){
                         // console.log('----------------------------')
                         // try{
-                                            // console.log(asset)
+                                            console.log(assetDataDb[0].valueOfBestTrait)
                         // } catch{}
                     assetData = {}
                     projectData = {}
@@ -419,6 +420,9 @@ async function getWalletAssetValues(walletAddr) {
             // console.log(assetData)
 
             */
+        } catch (err){
+            console.log(err)
+        }
         }  
         // console.log(allAssetsReal)
   
@@ -433,6 +437,6 @@ async function getWalletAssetValues(walletAddr) {
 //   console.log(allAssetsReal);
   return allAssetsReal;
 }
-// getWalletAssetValues('stake1u8t4fysrsg2s0dr9aefc7kmhzzr227zfhj9j8fck6ln972s6l68ze')
+getWalletAssetValues('$lifesgood')
 
 exports.getWalletAssetValues = getWalletAssetValues;

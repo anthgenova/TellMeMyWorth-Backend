@@ -51,7 +51,7 @@ async function insertWalletData(walletAddr, database = 'test'){
     console.log(stakeAddr)
 
     // mongoose.connect(`mongodb://localhost/TellMeMyWorth_Users`)
-    // mongoose.connect(`mongodb://localhost/TellMeMyWorth`)
+    // mongoose.connect(`mongodb+srv://TellTwan:q23LUx8K0617E5pa@TellMeMyWorth-CoreDB-6341cc4d.mongo.ondigitalocean.com/TellMeMyWorth?authSource=admin&replicaSet=TellMeMyWorth-CoreDB&tls=true`)
     //     .then(() => console.log('Connecting to MongoDB...'))
     //     .catch(err => console.error('Could not connect to MongoDB...', err));
 
@@ -144,5 +144,5 @@ async function insertWalletData(walletAddr, database = 'test'){
     // mongoose.disconnect();
 }
 
-// insertWalletData('stake1u9nx5zqz2x863vlcgjmg3jm2lyg94xt4029j979c5vjsu5gdh9ayn')
+insertWalletData('$quackquack')
 exports.insertWalletData = insertWalletData;

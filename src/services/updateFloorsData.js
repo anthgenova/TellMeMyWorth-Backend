@@ -21,7 +21,7 @@ async function updateFloorsData (){
     // for (const policyFound of policiesFound){
     policiesFound.forEach(async (policyFound, index) => {
 
-        await timeout(200 * (index + 1))
+        await timeout(300 * (index + 1))
         // index++
         const id = await PolicyId
             .find({policies: policyFound.policy_id})

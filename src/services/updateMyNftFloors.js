@@ -120,7 +120,7 @@ async function updateMyNftFloors(policyId, fingerprint) {
                 // console.log(floor[index].policy + '.' + floor[index].name)
                 const Nft = mongoose.model(floor.policy_id, nftSchema, floor.policy_id);
 
-                // console.log(floor.trait_floors)
+                // console.log(Nft)
 
                 const nfts = await Nft
                 .find({fingerprint: fingerprint})
@@ -132,7 +132,7 @@ async function updateMyNftFloors(policyId, fingerprint) {
                   // console.log(nft.onchain_metadata)
                   metadataArray = await denestObject(nft.onchain_metadata)
                   // console.log(await denestObject(nft.onchain_metadata))
-                  // console.log(metadataArray)
+                  console.log(metadataArray)
                   // console.log(floor.trait_floors[0])
                   // console.log(floor.trait_floors[0]['attributes / Headwear, red horns'])
 
@@ -155,7 +155,7 @@ async function updateMyNftFloors(policyId, fingerprint) {
                     } 
                   })
                   let bestTraitAndValue = Object.entries(traitValues).sort((x, y) => y[1] - x[1])[0]
-// console.log(bestTraitAndValue)
+console.log(bestTraitAndValue)
                   if(bestTraitAndValue){
                     // console.log(bestTraitAndValue[1])
                     // console.log(bestTraitAndValue[0])
@@ -268,6 +268,6 @@ async function updateMyNftFloors(policyId, fingerprint) {
               }
     }
 // updateMyNftFloors()
-// updateMyNftFloors('bd3602618dc1d4aec509e3532032ef204e0583ff6d5ad4ea81e96145', 'asset19kf5h8dca6pywzeal0meagm5fccum2vrf50can')
+// updateMyNftFloors('40fa2aa67258b4ce7b5782f74831d46a84c59a0ff0c28262fab21728', 'asset1r4e9fx6mpw029ss0h9smnuzfuzf5snf4mc0lr2')
 exports.updateMyNftFloors = updateMyNftFloors;
     

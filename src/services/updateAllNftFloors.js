@@ -96,7 +96,7 @@ async function denestArray(nestedArray){
 
 async function updateAllNftFloors() {
     //   mongoose.connect(`mongodb://localhost/TellMeMyWorth_Collections`)
-    //   mongoose.connect(`mongodb://localhost/TellMeMyWorth`)
+    //   mongoose.connect(`mongodb+srv://TellTwan:q23LUx8K0617E5pa@TellMeMyWorth-CoreDB-6341cc4d.mongo.ondigitalocean.com/TellMeMyWorth?authSource=admin&replicaSet=TellMeMyWorth-CoreDB&tls=true`)
     //       .then(() => console.log('Connecting to MongoDB...'))
     //       .catch(err => console.error('Could not connect to MongoDB...', err));
     
@@ -105,21 +105,22 @@ async function updateAllNftFloors() {
     
         const floors = await Floor
           .find()
-          // .find({policy_id: "4bf184e01e0f163296ab253edd60774e2d34367d0e7b6cbc689b567d"})
+        //   .find({policy_id: "40fa2aa67258b4ce7b5782f74831d46a84c59a0ff0c28262fab21728"})
           .select({ trait_floors: 1, policy_id:1 })
             // .limit(1);
     
-            // console.log(floors)
+            console.log(floors)
     
             // floors.forEach(async (floor, index) => {
                 for( const floor of floors){
-              // console.log(floor.trait_floors[0])
+                    // console.log('PPPPPPPPPPPPPPPPPPPP')
+            //   console.log(floor.trait_floors[0])
 
                 // await timeout(100 * (index + 1))
                 // console.log(floor[index].policy + '.' + floor[index].name)
                 const Nft = mongoose.model(floor.policy_id, nftSchema, floor.policy_id);
 
-                // console.log(floor.trait_floors)
+                // console.log(Nft)
 
                 const nfts = await Nft
                 .find()
@@ -128,16 +129,17 @@ async function updateAllNftFloors() {
 
                 nfts.forEach(async (nft) => {
                   globalMetadataArray = []
-                  // console.log(await denestObject(nft.onchain_metadata))
+                //   console.log((nft.onchain_metadata))
                   metadataArray = await denestObject(nft.onchain_metadata)
                   // console.log(await denestObject(nft.onchain_metadata))
                   console.log('__________________')
-                  // console.log(metadataArray)
+                //   console.log(metadataArray)
 
                   let traitValues = {}
                   metadataArray.forEach(assetMetada =>{
                     // console.log('AAAAAAAAAAAAAAAAAAA')
                     // console.log(floor.trait_floors[0])
+                    // console.log(floor.trait_floors[0][Object.keys(floor.trait_floors[0]).find(key => key.toLowerCase() === assetMetada.toLowerCase())])
                     if(floor.trait_floors[0][assetMetada] !== undefined){
                       traitValues[assetMetada] = floor.trait_floors[0][assetMetada]
                     } else if (floor.trait_floors[0][Object.keys(floor.trait_floors[0]).find(key => key.toLowerCase() === assetMetada.toLowerCase())] !== undefined){
@@ -145,9 +147,9 @@ async function updateAllNftFloors() {
                         traitValues[assetMetada] = floor.trait_floors[0][Object.keys(floor.trait_floors[0]).find(key => key.toLowerCase() === assetMetada.toLowerCase())]
                       } 
                     })
-                  // console.log(traitValues)
+                //   console.log(traitValues)
                   let bestTraitAndValue = Object.entries(traitValues).sort((x, y) => y[1] - x[1])[0]
-
+                  console.log(bestTraitAndValue)
                   if(bestTraitAndValue){
                     // console.log(bestTraitAndValue[1])
                     // console.log(bestTraitAndValue[0])
@@ -259,6 +261,6 @@ async function updateAllNftFloors() {
             }
             // })
 }
-// updateAllNftFloors()
+updateAllNftFloors()
 exports.updateAllNftFloors = updateAllNftFloors;
     
