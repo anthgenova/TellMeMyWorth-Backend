@@ -144,14 +144,14 @@ async function updateMyNftFloors(policyId, fingerprint) {
                     // console.log(floor.trait_floors[0])
                     // console.log(assetMetada )
                     // console.log(assetMetada.toLowerCase() )
-                    // console.log(floor.trait_floors[0][Object.keys(floor.trait_floors[0]).find(key => key.toLowerCase() === assetMetada.toLowerCase())])
+                    // console.log(floor.trait_floors[0][Object.keys(floor.trait_floors[0]).find(key => key.toLowerCase() === assetMetada.toLowerCase() || key.toLowerCase() === assetMetada.toLowerCase() + ', undefined')])
                     if(floor.trait_floors[0][assetMetada] !== undefined){
                       // console.log('1')
                       traitValues[assetMetada] = floor.trait_floors[0][assetMetada]
 
-                    } else if (floor.trait_floors[0][Object.keys(floor.trait_floors[0]).find(key => key.toLowerCase() === assetMetada.toLowerCase())] !== undefined){
+                    } else if (floor.trait_floors[0][Object.keys(floor.trait_floors[0]).find(key => key.toLowerCase() === assetMetada.toLowerCase() || key.toLowerCase() === assetMetada.toLowerCase() + ', undefined')] !== undefined){
                       // console.log('2')
-                      traitValues[assetMetada] = floor.trait_floors[0][Object.keys(floor.trait_floors[0]).find(key => key.toLowerCase() === assetMetada.toLowerCase())]
+                      traitValues[assetMetada] = floor.trait_floors[0][Object.keys(floor.trait_floors[0]).find(key => key.toLowerCase() === assetMetada.toLowerCase() || key.toLowerCase() === assetMetada.toLowerCase() + ', undefined')]
                     } 
                   })
                   let bestTraitAndValue = Object.entries(traitValues).sort((x, y) => y[1] - x[1])[0]
@@ -268,6 +268,6 @@ console.log(bestTraitAndValue)
               }
     }
 // updateMyNftFloors()
-// updateMyNftFloors('40fa2aa67258b4ce7b5782f74831d46a84c59a0ff0c28262fab21728', 'asset1r4e9fx6mpw029ss0h9smnuzfuzf5snf4mc0lr2')
+// updateMyNftFloors('d5e6bf0500378d4f0da4e8dde6becec7621cd8cbf5cbb9b87013d4cc', 'asset1akw2gfpt293uhmyfavzju4k4jumvttt2r5l2ea')
 exports.updateMyNftFloors = updateMyNftFloors;
     

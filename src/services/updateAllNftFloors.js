@@ -142,10 +142,10 @@ async function updateAllNftFloors() {
                     // console.log(floor.trait_floors[0][Object.keys(floor.trait_floors[0]).find(key => key.toLowerCase() === assetMetada.toLowerCase())])
                     if(floor.trait_floors[0][assetMetada] !== undefined){
                       traitValues[assetMetada] = floor.trait_floors[0][assetMetada]
-                    } else if (floor.trait_floors[0][Object.keys(floor.trait_floors[0]).find(key => key.toLowerCase() === assetMetada.toLowerCase())] !== undefined){
+                    } else if (floor.trait_floors[0][Object.keys(floor.trait_floors[0]).find(key => key.toLowerCase() === assetMetada.toLowerCase() || key.toLowerCase() === assetMetada.toLowerCase() + ', undefined')] !== undefined){
                         // console.log('2')
-                        traitValues[assetMetada] = floor.trait_floors[0][Object.keys(floor.trait_floors[0]).find(key => key.toLowerCase() === assetMetada.toLowerCase())]
-                      } 
+                        traitValues[assetMetada] = floor.trait_floors[0][Object.keys(floor.trait_floors[0]).find(key => key.toLowerCase() === assetMetada.toLowerCase() || key.toLowerCase() === assetMetada.toLowerCase() + ', undefined')]
+                        } 
                     })
                 //   console.log(traitValues)
                   let bestTraitAndValue = Object.entries(traitValues).sort((x, y) => y[1] - x[1])[0]
