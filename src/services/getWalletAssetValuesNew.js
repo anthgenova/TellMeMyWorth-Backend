@@ -235,7 +235,11 @@ async function getWalletAssetValues(walletAddr) {
     
                     assetData["_id"] = asset.fingerprint;
                     projectData["_id"] = collection;
-                    projectData["name"] = projectList[collection][0];
+                    try{
+                        projectData["name"] = projectList[collection][0];
+                    } catch {
+                        projectData["name"] = collection
+                    }
                     assetData["project"] = projectData;
                     try{
                         assetData["asset"] = asset.onchain_metadata.name;
@@ -243,24 +247,35 @@ async function getWalletAssetValues(walletAddr) {
                         assetData["asset"] = asset.fingerprint;
                     }
 
-                    if(assetDataDb[0].valueOfBestTrait === 0 || projectList[collection][1] === true ){
-                        if (projectList[collection][2] === null){
-                            assetData["value"] = 0;
-                        } else {
+                    // console.log(asset.fingerprint)
+                    // console.log(asset)
+                    // console.log( projectList[collection][2])
+
+                    try{
+                        // if(assetDataDb[0].valueOfBestTrait === 0 || projectList[collection][1] === true ){
+                        if(asset.valueOfBestTrait === 0 || projectList[collection][1] === true ){
+                            if (projectList[collection][2] === null){
+                                assetData["value"] = 0;
+                            } else {
+                                assetData["value"] = projectList[collection][2];
+                            }
+                            assetData["valueBasedOn"] = 'Floor'
+                        // } else if (assetDataDb[0].valueOfBestTrait === projectList[collection][2]){
+                        } else if (asset.valueOfBestTrait === projectList[collection][2]){
                             assetData["value"] = projectList[collection][2];
+                            assetData["valueBasedOn"] = 'Floor'
+                        } else {
+                            assetData["value"] = asset.valueOfBestTrait;
+                            assetData["valueBasedOn"] = asset.bestTrait.replace('attributes / ', '')
+                                .replace(',undefined' || ', undefined', '')
+                                .replace(',' || ', ', ': ')
+                                .split(' ')
+                                .map((s) => s.charAt(0).toUpperCase() + s.substring(1))
+                                .join(' ');
                         }
-                        assetData["valueBasedOn"] = 'Floor'
-                    } else if (assetDataDb[0].valueOfBestTrait === projectList[collection][2]){
-                        assetData["value"] = projectList[collection][2];
-                        assetData["valueBasedOn"] = 'Floor'
-                    } else {
-                        assetData["value"] = asset.valueOfBestTrait;
-                        assetData["valueBasedOn"] = asset.bestTrait.replace('attributes / ', '')
-                            .replace(',undefined' || ', undefined', '')
-                            .replace(',' || ', ', ': ')
-                            .split(' ')
-                            .map((s) => s.charAt(0).toUpperCase() + s.substring(1))
-                            .join(' ');
+                    } catch {
+                        assetData["value"] = 0;
+                        assetData["valueBasedOn"] = 'No Data'
                     }
 
                     try{

@@ -156,12 +156,36 @@ async function updateAllNftFloors() {
                     // console.log(nft.fingerprint)
                     // console.log(Nft)
                   
+                    let valueOfBestTrait = bestTraitAndValue[1]
+                    let bestTrait = bestTraitAndValue[0]
+
+                    if(floor.policy_id === 'f0ff48bbb7bbe9d59a40f1ce90e9e9d0ff5002ec48f232b49ca0fb9a'){
+                      let handleLength = nft.onchain_metadata.name.substring(1).length
+                      console.log(handleLength)
+                      if(handleLength === 2){
+                        valueOfBestTrait = 995
+                        bestTrait = 'Ultra Rare'
+                      } else if (handleLength === 3) {
+                        valueOfBestTrait = 445
+                        bestTrait = 'Rare'
+                      } else if (handleLength <= 7) {
+                        valueOfBestTrait = 80
+                        bestTrait = 'Common'
+                      } else {
+                        // valueOfBestTrait = 15
+                        bestTrait = 'Basic'
+                      }
+                    }
+
+                    console.log(valueOfBestTrait)
+                    console.log(bestTrait)
+
                   await Nft.updateOne(
                     { fingerprint: nft.fingerprint },
                     {
                       $set: {
-                        valueOfBestTrait: bestTraitAndValue[1],
-                        bestTrait: bestTraitAndValue[0],
+                        valueOfBestTrait: valueOfBestTrait,
+                        bestTrait: bestTrait,
                         date: Date.now(),
                       },
                     }

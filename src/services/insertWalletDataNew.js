@@ -6,6 +6,7 @@ const { getMyWalletData } = require("../services/getMyWalletData");
 const { insertMyAssetMetadata } = require("../services/insertMyAssetMetadata");
 const { updateMyNftFloors } = require("../services/updateMyNftFloors");
 const { Wallet } = require("../models/wallet");
+const { SavedFingerprint } = require("../models/savedFingerprints");
 
 function timeout(ms) {
     return new Promise(resolve => setTimeout(resolve, ms));
@@ -52,8 +53,8 @@ async function insertWalletData(walletAddr, database = 'test'){
 
     // mongoose.connect(`mongodb://localhost/TellMeMyWorth_Users`)
     // mongoose.connect(`mongodb+srv://TellTwan:q23LUx8K0617E5pa@TellMeMyWorth-CoreDB-6341cc4d.mongo.ondigitalocean.com/TellMeMyWorth?authSource=admin&replicaSet=TellMeMyWorth-CoreDB&tls=true`)
-    //     .then(() => console.log('Connecting to MongoDB...'))
-    //     .catch(err => console.error('Could not connect to MongoDB...', err));
+        // .then(() => console.log('Connecting to MongoDB...'))
+        // .catch(err => console.error('Could not connect to MongoDB...', err));
 
     // Get wallet data from pool.pm. This contains the ADA amount and assets
     const walletData = await getMyWalletData(stakeAddr)
@@ -110,12 +111,31 @@ async function insertWalletData(walletAddr, database = 'test'){
     const result = await wallet.save()
     }
 
+    let walletFingerprints = []
+    walletData.tokens.forEach(async (token) => {
+        walletFingerprints.push(token.fingerprint)
+    })
+    
+    let savedFingerprints = await SavedFingerprint
+        .find({fingerprint: { $in:  walletFingerprints} })
+        .select({ fingerprint: 1})
+    
+    console.log(walletData.tokens)
 
-    // console.log(walletData.addr)
+    savedFingerprints.forEach(fingerprint => {
+        console.log(fingerprint.fingerprint)
+        const indexOfObject = walletData.tokens.findIndex(object => {
+            return object.fingerprint === fingerprint.fingerprint
+        })
+        walletData.tokens.splice(indexOfObject, 1)
+    })
+
+
+    console.log(walletData.tokens)
 
     let iterationIndex = 1
     walletData.tokens.forEach(async (token, index) => {
-        await timeout(150 * (index + 1))
+        await timeout(75 * (index + 1))
         console.log(token)
         // console.log(iterationIndex)
         // if(iterationIndex === 1 ){
@@ -132,9 +152,15 @@ async function insertWalletData(walletAddr, database = 'test'){
         // console.log(token.policy)
         // console.log(token.fingerprint)
         // walletPolicyIds.push(token.policy)
+        
         await insertMyAssetMetadata(walletData.addr, token, iterationIndex)
-        await updateMyNftFloors(token.policy, token.fingerprint)        
+        await updateMyNftFloors(token.policy, token.fingerprint)    
+        
+        // console.log(token.fingerprint)
+        const saveFingerprint = new SavedFingerprint(token)
+        await saveFingerprint.save()
     })
+
     return walletData.tokens.length
 
     // await insertMyAssetMetadata(walletData.addr)
@@ -144,5 +170,5 @@ async function insertWalletData(walletAddr, database = 'test'){
     // mongoose.disconnect();
 }
 
-// insertWalletData('$quackquack')
+// insertWalletData('stake1u8t4fysrsg2s0dr9aefc7kmhzzr227zfhj9j8fck6ln972s6l68ze')
 exports.insertWalletData = insertWalletData;
