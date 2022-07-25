@@ -95,17 +95,17 @@ async function denestArray(nestedArray){
 }
 
 async function updateAllNftFloors() {
-    //   mongoose.connect(`mongodb://localhost/TellMeMyWorth_Collections`)
+        //   mongoose.connect(`mongodb://localhost/TellMeMyWorth`)
     //   mongoose.connect(`mongodb+srv://TellTwan:q23LUx8K0617E5pa@TellMeMyWorth-CoreDB-6341cc4d.mongo.ondigitalocean.com/TellMeMyWorth?authSource=admin&replicaSet=TellMeMyWorth-CoreDB&tls=true`)
-    //       .then(() => console.log('Connecting to MongoDB...'))
-    //       .catch(err => console.error('Could not connect to MongoDB...', err));
+        //   .then(() => console.log('Connecting to MongoDB...'))
+        //   .catch(err => console.error('Could not connect to MongoDB...', err));
     
         // let floorNames = await blockfrost.getNftNames(policyId)
         // console.log(floorNames)
     
         const floors = await Floor
           .find()
-        //   .find({policy_id: "40fa2aa67258b4ce7b5782f74831d46a84c59a0ff0c28262fab21728"})
+        //   .find({policy_id: "13e3f9964fe386930ec178d12a43c96a7f5841270c2146fc509a9f3e"})
           .select({ trait_floors: 1, policy_id:1 })
             // .limit(1);
     
@@ -150,33 +150,70 @@ async function updateAllNftFloors() {
                 //   console.log(traitValues)
                   let bestTraitAndValue = Object.entries(traitValues).sort((x, y) => y[1] - x[1])[0]
                   console.log(bestTraitAndValue)
-                  if(bestTraitAndValue){
+                //   console.log(nft)
+
+                let valueOfBestTrait
+                let bestTrait
+
+                if(floor.policy_id === 'f0ff48bbb7bbe9d59a40f1ce90e9e9d0ff5002ec48f232b49ca0fb9a'){
+                    let handleLength = nft.onchain_metadata.name.substring(1).length
+                    console.log(handleLength)
+                    if(handleLength === 2){
+                      valueOfBestTrait = 995
+                      bestTrait = 'Ultra Rare'
+                    } else if (handleLength === 3) {
+                      valueOfBestTrait = 445
+                      bestTrait = 'Rare'
+                    } else if (handleLength <= 7) {
+                      valueOfBestTrait = 80
+                      bestTrait = 'Common'
+                    } else {
+                      // valueOfBestTrait = 15
+                      bestTrait = 'Basic'
+                    }
+                  } else if(floor.policy_id === '13e3f9964fe386930ec178d12a43c96a7f5841270c2146fc509a9f3e'){
+                    // console.log(nft.onchain_metadata.Size)
+                    // console.log(nft.onchain_metadata.Zone)
+                    // console.log(`${nft.onchain_metadata.Size} ${nft.onchain_metadata.Zone}`)
+                    // console.log(floor.trait_floors[0][`${nft.onchain_metadata.Size} ${nft.onchain_metadata.Zone}`])
+                    valueOfBestTrait = floor.trait_floors[0][`${nft.onchain_metadata.Size} ${nft.onchain_metadata.Zone}`]
+                    bestTrait = `${nft.onchain_metadata.Size} ${nft.onchain_metadata.Zone}`
+
+
+                  } else if(bestTraitAndValue){
                     // console.log(bestTraitAndValue[1])
                     // console.log(bestTraitAndValue[0])
                     // console.log(nft.fingerprint)
                     // console.log(Nft)
                   
-                    let valueOfBestTrait = bestTraitAndValue[1]
-                    let bestTrait = bestTraitAndValue[0]
+                    // let valueOfBestTrait = bestTraitAndValue[1]
+                    // let bestTrait = bestTraitAndValue[0]
+                     valueOfBestTrait = bestTraitAndValue[1]
+                     bestTrait = bestTraitAndValue[0]
 
-                    if(floor.policy_id === 'f0ff48bbb7bbe9d59a40f1ce90e9e9d0ff5002ec48f232b49ca0fb9a'){
-                      let handleLength = nft.onchain_metadata.name.substring(1).length
-                      console.log(handleLength)
-                      if(handleLength === 2){
-                        valueOfBestTrait = 995
-                        bestTrait = 'Ultra Rare'
-                      } else if (handleLength === 3) {
-                        valueOfBestTrait = 445
-                        bestTrait = 'Rare'
-                      } else if (handleLength <= 7) {
-                        valueOfBestTrait = 80
-                        bestTrait = 'Common'
-                      } else {
-                        // valueOfBestTrait = 15
-                        bestTrait = 'Basic'
-                      }
-                    }
+                    // if(floor.policy_id === 'f0ff48bbb7bbe9d59a40f1ce90e9e9d0ff5002ec48f232b49ca0fb9a'){
+                    //   let handleLength = nft.onchain_metadata.name.substring(1).length
+                    //   console.log(handleLength)
+                    //   if(handleLength === 2){
+                    //     valueOfBestTrait = 995
+                    //     bestTrait = 'Ultra Rare'
+                    //   } else if (handleLength === 3) {
+                    //     valueOfBestTrait = 445
+                    //     bestTrait = 'Rare'
+                    //   } else if (handleLength <= 7) {
+                    //     valueOfBestTrait = 80
+                    //     bestTrait = 'Common'
+                    //   } else {
+                    //     // valueOfBestTrait = 15
+                    //     bestTrait = 'Basic'
+                    //   }
+                    // } else if(floor.policy_id === '13e3f9964fe386930ec178d12a43c96a7f5841270c2146fc509a9f3e'){
+                    //     console.log(nft)
+                    //     console.log(floor)
 
+                    // }
+
+                  }
                     console.log(valueOfBestTrait)
                     console.log(bestTrait)
 
@@ -190,7 +227,7 @@ async function updateAllNftFloors() {
                       },
                     }
                   )
-                  }
+                //   }
                 //   console.log(bestTraitAndValue)
                   
                   // console.log(Object.keys(globalMetadataArray).reduce((a, b) => obj[a] > obj[b] ? a : b))
@@ -243,6 +280,7 @@ async function updateAllNftFloors() {
                   console.log(metadataArray)
                   */
                 })
+    
               //   console.log(Nft)
               //   await Nft.updateMany({}, {
               //     $set: {

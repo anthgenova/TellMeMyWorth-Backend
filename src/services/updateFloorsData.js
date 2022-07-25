@@ -3,6 +3,8 @@ const superagent = require('superagent');
 // const { getAllPoliciesData } = require("../apiServices/cnftjungleApi");
 const { PolicyId } = require("../models/policiesTest");
 const { Floor } = require("../models/floors");
+const { updatePitchesFloors } = require("../services/updatePitchesFloors");
+
 
 function timeout(ms) {
     return new Promise(resolve => setTimeout(resolve, ms));
@@ -29,105 +31,109 @@ async function updateFloorsData (){
             .limit(1);
   
         try {
-            const res = await superagent.get(`https://api.cnftjungle.app/utils/traitfloors/${id[0].id}`);
-            // console.log(res.body.floors);
-            const data = await res.body.floors;
-            console.log(data)
-      
-            // let traitTypes = Object.keys(data)
-            // let traitValues = Object.keys(Object.values(data))
-            let traitFloorTable = {}
-            console.log('restart')
-            let i =0
-            let saveData = {};
-            for(let [key, value] of Object.entries(data)) {
-                i++
-                saveData ={}
-                console.log(i)
-                // console.log(`${key}: ${value}`);
-                for(let [insideKey, insideValue] of Object.entries(value)) {
-                    let traitArray = [];
-                    let nestedObject = {};
-                    //console.log(`${insideKey}: ${insideValue}`)
-                    if(insideKey.includes('[' && ']')){
-                        // console.log(typeof insideKey)
-                        
-                        let inside = insideKey.replace("['", '').replace("']", '').replaceAll("'", "")
-      
-                        traitArray = inside.split(", ");
-                        // console.log(traitArray)
-      
-                        traitArray.forEach(trait => {
-                            nestedObject = {}
-                            splitTraits = trait.split(': ')
-                            // console.log(splitTraits[0])
-                            joinedTraits = splitTraits[0] + ', ' + splitTraits[1]
-      
-                            if (!traitFloorTable.hasOwnProperty(joinedTraits) || traitFloorTable[joinedTraits] > insideValue){
-                                traitFloorTable[joinedTraits] = insideValue;
-                                // traitFloorTable[joinedTraits] = insideValue;
-                            }
+            if(policyFound.policy_id === '13e3f9964fe386930ec178d12a43c96a7f5841270c2146fc509a9f3e'){
+                await updatePitchesFloors()
+            } else {
+                const res = await superagent.get(`https://api.cnftjungle.app/utils/traitfloors/${id[0].id}`);
+                // console.log(res.body.floors);
+                const data = await res.body.floors;
+                console.log(data)
+        
+                // let traitTypes = Object.keys(data)
+                // let traitValues = Object.keys(Object.values(data))
+                let traitFloorTable = {}
+                console.log('restart')
+                let i =0
+                let saveData = {};
+                for(let [key, value] of Object.entries(data)) {
+                    i++
+                    saveData ={}
+                    console.log(i)
+                    // console.log(`${key}: ${value}`);
+                    for(let [insideKey, insideValue] of Object.entries(value)) {
+                        let traitArray = [];
+                        let nestedObject = {};
+                        //console.log(`${insideKey}: ${insideValue}`)
+                        if(insideKey.includes('[' && ']')){
+                            // console.log(typeof insideKey)
                             
-                        })
-                        // console.log(traitFloorTable)
-      
-                        saveData = traitFloorTable
-      
-                    } else {
-                        // console.log(`${typeof key}: ${ insideKey}: ${typeof insideValue}`)
-                        traitFloorTable[`${key}, ${insideKey}`] = insideValue;
-                        // saveData = data;
+                            let inside = insideKey.replace("['", '').replace("']", '').replaceAll("'", "")
+        
+                            traitArray = inside.split(", ");
+                            // console.log(traitArray)
+        
+                            traitArray.forEach(trait => {
+                                nestedObject = {}
+                                splitTraits = trait.split(': ')
+                                // console.log(splitTraits[0])
+                                joinedTraits = splitTraits[0] + ', ' + splitTraits[1]
+        
+                                if (!traitFloorTable.hasOwnProperty(joinedTraits) || traitFloorTable[joinedTraits] > insideValue){
+                                    traitFloorTable[joinedTraits] = insideValue;
+                                    // traitFloorTable[joinedTraits] = insideValue;
+                                }
+                                
+                            })
+                            // console.log(traitFloorTable)
+        
+                            saveData = traitFloorTable
+        
+                        } else {
+                            // console.log(`${typeof key}: ${ insideKey}: ${typeof insideValue}`)
+                            traitFloorTable[`${key}, ${insideKey}`] = insideValue;
+                            // saveData = data;
+                        }
                     }
                 }
-            }
-      
-            let sortable = [];
-            for (let trait in traitFloorTable) {
-                sortable.push([trait, traitFloorTable[trait]]);
-            }
-      
-            sortable.sort(function(a, b) {
-                return a[1] - b[1];
-            });
-      
-            // console.log(sortable)
-      
-            let sortedTraitFloorTable = {}
-            for(let i = 0; i < sortable.length; i++){
-                // sortedTraitArray = sortable[i][0].split(", ");
-                sortedTraitFloorTable[sortable[i][0]] = sortable[i][1]
-                // console.log(sortedTraitFloorTable)
-                // console.log(sortable[i][0])
-            }
-      
-      
-            console.log(sortedTraitFloorTable)
-            const nftFloorData = new Floor({
-                trait_floors: sortedTraitFloorTable,
-                policy_id: policyFound.policy_id,
-                });
-                // console.log(nftFloorData)
-  
-            // const floorFound = await Floor.find({
-            //   policy_id: policyFound.policy_id ,
-            // })
-            //   .select({ policy_id: 1 })
-            //   .limit(1);
-            
-            // if (floorFound.length > 0) {
-                const floorUpdate = await Floor.updateOne(
-                { policy_id: policyFound.policy_id },
-                {
-                  $set: {
-                    trait_floors: sortedTraitFloorTable,
-                    date: Date.now(),
-                  },
+        
+                let sortable = [];
+                for (let trait in traitFloorTable) {
+                    sortable.push([trait, traitFloorTable[trait]]);
                 }
-              );
-          
-            // } else {   
-            //   const result = await nftFloorData.save();
-            // }
+        
+                sortable.sort(function(a, b) {
+                    return a[1] - b[1];
+                });
+        
+                // console.log(sortable)
+        
+                let sortedTraitFloorTable = {}
+                for(let i = 0; i < sortable.length; i++){
+                    // sortedTraitArray = sortable[i][0].split(", ");
+                    sortedTraitFloorTable[sortable[i][0]] = sortable[i][1]
+                    // console.log(sortedTraitFloorTable)
+                    // console.log(sortable[i][0])
+                }
+        
+        
+                console.log(sortedTraitFloorTable)
+                const nftFloorData = new Floor({
+                    trait_floors: sortedTraitFloorTable,
+                    policy_id: policyFound.policy_id,
+                    });
+                    // console.log(nftFloorData)
+    
+                // const floorFound = await Floor.find({
+                //   policy_id: policyFound.policy_id ,
+                // })
+                //   .select({ policy_id: 1 })
+                //   .limit(1);
+                
+                // if (floorFound.length > 0) {
+                    const floorUpdate = await Floor.updateOne(
+                    { policy_id: policyFound.policy_id },
+                    {
+                    $set: {
+                        trait_floors: [sortedTraitFloorTable],
+                        date: Date.now(),
+                    },
+                    }
+                );
+            
+                // } else {   
+                //   const result = await nftFloorData.save();
+                // }
+            }
         } catch (err) {
             console.error(policyFound.policy_id + err);
             // if (retries > 0) {

@@ -47,6 +47,46 @@ async function getAllPoliciesData() {
     return(allPoliciesData);
 };
 
+async function getClayPitchesData() {
+    let page = 1;
+    let allPoliciesData = [];
+    let lastResult =[];
+
+    // do{
+        try {
+            // console.log('page' + page)
+
+            const res = await superagent.get(`https://api.cnftjungle.app/collections/50890?page=1&perPage=40000&sort=assetNumber&sortDirection=asc&traitFilterLogic=union&priceType=ada&rarityType=score&rewardType=staking`);
+            // console.log(res.body.assets)
+            const data = await res.body.assets;
+            lastResult = data;
+            // console.log(Object.keys(lastResult).length)
+            // console.log(lastResult)
+            data.forEach(policy => {
+                const { traits, name, listing_price } = policy;
+                allPoliciesData.push({ traits, name, listing_price });
+            });
+            // page++
+            // console.log(lastResult.length)
+            // if (lastResult.length < 1000){
+            //     console.log('break')
+            //     break
+            // }
+
+            //   console.log(res.body);
+            //   console.log(typeof res.body.tokens)
+            // return tokens = res.body
+        } catch (err) {
+            console.error(err);
+        }
+    // } while (lastResult != null)
+    // } while (page < 6)
+
+    // console.log (allPoliciesData);
+    return(allPoliciesData);
+
+}
+
 // function getNested(obj, ...args) {
 //     return args.reduce((obj, level) => obj && obj[level], obj)
 // }
@@ -277,7 +317,8 @@ async function getAllFloorData(){
 getAllFloorData()
 */
 
-// getTokenPrices()
+// getClayPitchesData()
 // getTokenPrice('ff97c85de383ebf0b047667ef23c697967719def58d380caf7f04b64', 'SOUL')
 module.exports.getAllPoliciesData = getAllPoliciesData
+module.exports.getClayPitchesData = getClayPitchesData
 // module.exports.getTokenPrice = getTokenPrice

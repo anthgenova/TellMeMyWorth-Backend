@@ -94,7 +94,6 @@ async function denestArray(nestedArray){
 }
 
 async function updateMyNftFloors(policyId, fingerprint) {
-    //   mongoose.connect(`mongodb://localhost/TellMeMyWorth_Collections`)
       // mongoose.connect(`mongodb://localhost/TellMeMyWorth`)
       //     .then(() => console.log('Connecting to MongoDB...'))
       //     .catch(err => console.error('Could not connect to MongoDB...', err));
@@ -155,7 +154,72 @@ async function updateMyNftFloors(policyId, fingerprint) {
                     } 
                   })
                   let bestTraitAndValue = Object.entries(traitValues).sort((x, y) => y[1] - x[1])[0]
-console.log(bestTraitAndValue)
+                  console.log(bestTraitAndValue)
+
+                  let valueOfBestTrait
+                  let bestTrait
+
+                  if(floor.policy_id === 'f0ff48bbb7bbe9d59a40f1ce90e9e9d0ff5002ec48f232b49ca0fb9a'){
+                      let handleLength = nft.onchain_metadata.name.substring(1).length
+                      console.log(handleLength)
+                      if(handleLength === 2){
+                        valueOfBestTrait = 995
+                        bestTrait = 'Ultra Rare'
+                      } else if (handleLength === 3) {
+                        valueOfBestTrait = 445
+                        bestTrait = 'Rare'
+                      } else if (handleLength <= 7) {
+                        valueOfBestTrait = 80
+                        bestTrait = 'Common'
+                      } else {
+                        // valueOfBestTrait = 15
+                        bestTrait = 'Basic'
+                      }
+                    } else if(floor.policy_id === '13e3f9964fe386930ec178d12a43c96a7f5841270c2146fc509a9f3e'){
+                      // console.log(nft.onchain_metadata.Size)
+                      // console.log(nft.onchain_metadata.Zone)
+                      // console.log(`${nft.onchain_metadata.Size} ${nft.onchain_metadata.Zone}`)
+                      // console.log(floor.trait_floors[0][`${nft.onchain_metadata.Size} ${nft.onchain_metadata.Zone}`])
+                      valueOfBestTrait = floor.trait_floors[0][`${nft.onchain_metadata.Size} ${nft.onchain_metadata.Zone}`]
+                      bestTrait = `${nft.onchain_metadata.Size} ${nft.onchain_metadata.Zone}`
+
+
+                    } else if(bestTraitAndValue){
+                      // console.log(bestTraitAndValue[1])
+                      // console.log(bestTraitAndValue[0])
+                      // console.log(nft.fingerprint)
+                      // console.log(Nft)
+                    
+                      // let valueOfBestTrait = bestTraitAndValue[1]
+                      // let bestTrait = bestTraitAndValue[0]
+                      valueOfBestTrait = bestTraitAndValue[1]
+                      bestTrait = bestTraitAndValue[0]
+
+                      // if(floor.policy_id === 'f0ff48bbb7bbe9d59a40f1ce90e9e9d0ff5002ec48f232b49ca0fb9a'){
+                      //   let handleLength = nft.onchain_metadata.name.substring(1).length
+                      //   console.log(handleLength)
+                      //   if(handleLength === 2){
+                      //     valueOfBestTrait = 995
+                      //     bestTrait = 'Ultra Rare'
+                      //   } else if (handleLength === 3) {
+                      //     valueOfBestTrait = 445
+                      //     bestTrait = 'Rare'
+                      //   } else if (handleLength <= 7) {
+                      //     valueOfBestTrait = 80
+                      //     bestTrait = 'Common'
+                      //   } else {
+                      //     // valueOfBestTrait = 15
+                      //     bestTrait = 'Basic'
+                      //   }
+                      // } else if(floor.policy_id === '13e3f9964fe386930ec178d12a43c96a7f5841270c2146fc509a9f3e'){
+                      //     console.log(nft)
+                      //     console.log(floor)
+
+                      // }
+
+                    }
+
+/*
                   if(bestTraitAndValue){
                     // console.log(bestTraitAndValue[1])
                     // console.log(bestTraitAndValue[0])
@@ -181,7 +245,7 @@ console.log(bestTraitAndValue)
                         bestTrait = 'Basic'
                       }
                     }
-
+*/
                     console.log(valueOfBestTrait)
                     console.log(bestTrait)
                   
@@ -195,7 +259,7 @@ console.log(bestTraitAndValue)
                       },
                     }
                   )
-                  }
+                  // }
                   // console.log(bestTraitAndValue)
                   
                   // console.log(Object.keys(globalMetadataArray).reduce((a, b) => obj[a] > obj[b] ? a : b))
