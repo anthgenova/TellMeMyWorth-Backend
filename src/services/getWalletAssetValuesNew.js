@@ -110,6 +110,9 @@ async function getWalletAssetValues(walletAddr) {
         assetData["valueBasedOn"] = "";
         assetData["optimized_source"] = "https://cryptologos.cc/logos/cardano-ada-logo.png";
         assetData["assetType"] = "Coin";
+        assetData["valueShown"] = assetData["value"];
+        assetData["basedOnShown"] = assetData["valueBasedOn"];
+
         //assetData["floorPrice"] = "";
         allAssetsReal.push(assetData);
         } 
@@ -176,7 +179,10 @@ async function getWalletAssetValues(walletAddr) {
               // console.log('policyId',token[0].policy_id)
               assetData["assetType"] = "Token";
               // assetData["floorPrice"] = floorPrice;
-// console.log(assetData)
+            // console.log(assetData)
+            assetData["valueShown"] = assetData["value"];
+            assetData["basedOnShown"] = assetData["valueBasedOn"];
+
               allAssetsReal.push(assetData);
                 
               tokenPoliciesUsed.push(myToken.policy_id)
@@ -273,9 +279,11 @@ async function getWalletAssetValues(walletAddr) {
                                 .map((s) => s.charAt(0).toUpperCase() + s.substring(1))
                                 .join(' ');
                         }
+                        assetData["floor"] = projectList[collection][2];
                     } catch {
                         assetData["value"] = 0;
                         assetData["valueBasedOn"] = 'No Data'
+                        assetData["floor"] = 0;
                     }
 
                     try{
@@ -283,6 +291,9 @@ async function getWalletAssetValues(walletAddr) {
                         assetData["optimized_source"] = "https://" + cid +".ipfs.infura-ipfs.io";
                     } catch{}
                     assetData["assetType"] = "Nft";
+                    assetData["valueShown"] = assetData["value"];
+                    assetData["basedOnShown"] = assetData["valueBasedOn"];
+                    
                     allAssetsReal.push(assetData);
 
 
