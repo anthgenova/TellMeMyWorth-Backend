@@ -288,7 +288,8 @@ async function getWalletAssetValues(walletAddr) {
 
                     try{
                         const cid = new CID(asset.onchain_metadata.image.replace('ipfs/', '').replace('ipfs://', '')).toV1().toString('base32')
-                        assetData["optimized_source"] = "https://" + cid +".ipfs.infura-ipfs.io";
+                        // assetData["optimized_source"] = "https://" + cid +".ipfs.infura-ipfs.io";
+                        assetData["optimized_source"] = "https://gateway.ipfs.io/ipfs/" + cid;
                     } catch{}
                     assetData["assetType"] = "Nft";
                     assetData["valueShown"] = assetData["value"];
